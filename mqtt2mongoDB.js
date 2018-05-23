@@ -58,7 +58,7 @@ MongoClient.connect(mongoUrl, function(error, database) //CONNECT TO MONGO
         {
            if (!collinfo)
            {
-              database.createCollection(objectID, {"capped": true, "size": 560, "max":5 },
+              database.createCollection(objectID, {"capped": true, "size": 560, "max":5 },//THIS WILL CHANGE TO HOLD MANY MORE ENTRIES
               function(err, collection)
               {
                  if (err) throw err;
