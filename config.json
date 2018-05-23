@@ -1,0 +1,14 @@
+{
+  "MQTT":    {
+              "host": "127.0.0.1",
+              "user": "ownMQTTUser",
+              "pass": "ownMQTTPass"
+             },
+  "MONGO":   {
+              "host": "127.0.0.1",
+              "port": "27017",
+              "base": "ownMONGOCollection",
+              "user": "ownMONGOUser",
+              "pass": "ownMONGOPass"
+             }
+}
