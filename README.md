@@ -4,7 +4,9 @@ This script is designed to work with a weather station (an object in general) - 
 JSON encoded MQTT message  to a server running a mosquitto broker. The script runs continuously on the server waiting 
 for incoming messages and   stores them in mongoDB.
 
+
 |-- PHILOSOPHY --|
+
 The sender of MQTT messages uses a SIM module / modem to send messages on air. For object identification the module's
 IMEI is extracted and used as "id" key JSON.
   
@@ -25,9 +27,20 @@ along with the database's name.
   
   
 |-- ATTEMPT TO SECURE IT --|
+
 Config.json is good to be hidden.
 Usernames and passwords should be encrypted. The script uses AES-128 encryption and a dongle for storing the keys for 
 decryption. Once the script starts "listening" - and keeps running - the dongle can be removed. No keys present.
-In case the dongle is missing the script won't start.
+In case the dongle is missing the script won't start and an error will be logged. In any case if someone get inside the
+server there is more to concern than just encryption...
+
+It works fine with PM2 for auto start and tested with both the actual esp8266 station, MQTT Box and MQTT Fx for load handling.
+It did well.
+
+Comments are pretty clear and self explanatory.
+
+Have fun and keep walking.
+
+
   
   
