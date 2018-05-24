@@ -1,0 +1,17 @@
+{
+  "MQTT":    {
+              "host": "127.0.0.1",
+              "user": "encryptedOrNotOwnMqttBrokerUser",
+              "pass": "encryptedOrNotOwnMqttBrokerPassword"
+             },
+  "MONGO":   {
+              "host": "127.0.0.1",
+              "port": "27017",
+              "base": "onesOwnDatabaseForStorage",
+              "user": "encryptedOrNotOwnMongoUserForDatabase",
+              "pass": "encryptedOrNotOwnMongoPasswordForDatabase"
+            },
+  "DGL" :   {
+              "p": "onesOwnPathToSecureDrive" 
+            }
+}
