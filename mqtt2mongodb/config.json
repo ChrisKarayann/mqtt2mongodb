@@ -1,0 +1,17 @@
+{
+  "MQTT":    {
+              "host": "127.0.0.1",
+              "user": "ca779810b9231e79340104a7d3821546",
+              "pass": "0d4db000ba3d7bd12f3ec04cccf3cb78"
+             },
+  "MONGO":   {
+              "host": "127.0.0.1",
+              "port": "27017",
+              "base": "allObjects",
+              "user": "1cbf31e55106bf76468e4437886edd1a",
+              "pass": "c9260f8442ba0ac76f9c11cc1da6007a"
+            },
+  "DGL" :   {
+              "p": "/media/chris/DONGLE/" 
+            }
+}

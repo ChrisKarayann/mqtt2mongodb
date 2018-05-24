@@ -1,0 +1,13 @@
+|---- BAD KARMA ----|
+SyntaxError: Unexpected end of JSON input
+WHEN : Thu May 24 2018 17:15:24 GMT+0300 (EEST)
+
+
+|---- BAD KARMA ----|
+SyntaxError: Unexpected end of JSON input
+WHEN : Thu May 24 2018 17:15:46 GMT+0300 (EEST)
+
+
+|--- Authorization System Failure ---|
+WHEN : Thu May 24 2018 17:16:09 GMT+0300 (EEST)
+
