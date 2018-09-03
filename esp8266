@@ -1,0 +1,169 @@
+/*
+ Name:		liturgyMqttDev.ino
+ Created:	1/20/2018 17:06:06
+ Author:	chris karayannidis / Liturgy ltd
+*/
+
+#define TINY_GSM_MODEM_SIM800 // definition of the modem used
+
+#include <PubSubClient.h> // mqtt manipulation lib
+#include <TinyGsmClient.h> // modem-gprs manipulation lib
+#include <SoftwareSerial.h> // cannot use the hardware serial...
+#include <ArduinoJson.h>
+#include <Ticker.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <Adafruit_BMP280.h>
+
+const char apn[] = "vpn-internet"; // gsm carrier 
+const char user[] = ""; // user empty
+const char pass[] = ""; // pass empty 
+
+const char* mqttServer = "liturgy-mqtt.darktech.org"; // my mqtt server domain
+const int mqttPort = 9993; // my mqtt server tcp websockets listening port
+const char* mqttUser = "litmqtt"; // obvious
+const char* mqttPassword = "litmqtt1980"; // obviousb 
+
+SoftwareSerial SerialAT(D4 , D3); //Rx , Tx - virtual for SoftSerial
+
+TinyGsm modem(SerialAT); // 1.declare the modem and its serial 
+TinyGsmClient client(modem); // 2.assign the client to modem
+PubSubClient mqtt(client); // 3.assign the mqtt client to modem client to manipulate the tcp messages
+
+Ticker intervalSender;
+
+Adafruit_BMP280 bmp; // I2C
+
+/* the function block which reconects to MQTT server if disconected */
+long lastReconAtt =0;
+
+boolean reconnect(){
+  String imei = modem.getIMEI();
+  String subTStr = "cmd/" + imei;
+  const char* subT = subTStr.c_str();
+  if (mqtt.connect("client")){
+    Serial.print("...connected to MQTT");
+    mqtt.subscribe(subT);
+  }
+  return client.connected();
+  }
+/* end of reconnection block */
+
+/* the function that sends data in 'Ticker' intervals */
+void sendMqtt()
+{
+  	pinMode(D6, OUTPUT); // set a led for debugging - this will be useful for remote installation    
+    StaticJsonBuffer<300> JSONbuffer;
+    JsonObject& JSONencoder = JSONbuffer.createObject();
+    JSONencoder["id"] = modem.getIMEI();
+	JSONencoder["tmp"] = bmp.readTemperature();
+	JSONencoder["hmd"] = "0";
+	JSONencoder["bar"] = (bmp.readPressure() * 0.00001);
+    JSONencoder["ghmd"] = "0";
+    JSONencoder["rin"] = "0";
+    JSONencoder["wnd"] = "0";
+    JSONencoder["oc1"] = digitalRead(D5);
+    JSONencoder["oc2"] = digitalRead(D7);
+    
+    char JSONmessageBuffer[120];
+    JSONencoder.printTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
+
+    /* Each time an interval MQTT message leaves the device a blink indicates the flying message */
+    digitalWrite(D6, HIGH);
+    mqtt.publish ("objects/raw", JSONmessageBuffer);
+    delay(81);
+    digitalWrite(D6, LOW);
+    /* end of above block */   
+	
+}
+/* end of data sender */
+
+/* this callback is the MQTT message RECEIVED from mosquitto server - it commands the esp8266 outputs */
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print ("message arrived with topic:");
+  Serial.println (topic);
+
+  Serial.print("message: ");
+  for (int i= 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+  Serial.println("-------------------------");
+  }
+/* the end of command callback block */
+
+void setup() {
+ 
+  Serial.begin(115200); // start the serial
+  delay(1200);
+
+  bmp.begin();
+
+  SerialAT.begin(115200); //start the SOFTSERIAL
+  delay(1200);
+
+  Serial.println("initializing modem...");
+  modem.restart();
+  String modemInfo = modem.getModemInfo();
+  Serial.print("modem: ");
+  Serial.println(modemInfo);
+
+  Serial.print("waiting for network...");
+  if (!modem.waitForNetwork()){
+    Serial.println("failed");
+    while(true);
+  }
+  Serial.println(" ok");
+
+  Serial.print("connecting to ");
+  Serial.print(apn);
+  Serial.print("...");
+  if (!modem.gprsConnect(apn, user, pass)){
+    Serial.println("failed to connect to apn");
+    while(true);
+  }
+  Serial.println(" ok");
+  delay(900);
+  
+  String imei = modem.getIMEI();
+  String subTStr = "cmd/" + imei;
+  const char* subT = subTStr.c_str();
+  delay(900);
+  Serial.println(subT);
+  
+  mqtt.setServer(mqttServer, mqttPort);
+  mqtt.setCallback(callback);
+  Serial.print("connecting to mqtt...");
+  lastReconAtt =0;
+  while (!mqtt.connected()) {
+      Serial.print (".");
+      if (mqtt.connect("ESP8266Client", mqttUser, mqttPassword)){ 
+      Serial.println ("\nconnected \n");
+  } else {
+      Serial.println ("\nfailed with state ");
+      Serial.println (mqtt.state());
+      delay(900);
+      }
+    }
+  
+  mqtt.subscribe(subT);
+  intervalSender.attach(30, sendMqtt);
+ }  
+
+  void loop(){
+    if (!mqtt.connected()){
+      long now = millis();
+      if (now - lastReconAtt > 5000){
+        Serial.print("attempt to reconnect...");
+        lastReconAtt = now;
+        if (reconnect()){
+          lastReconAtt = 0;
+          }
+        }
+      }else{
+    
+    mqtt.loop(); // MQTT client loops to stay connected to listen for messages FROM mosquitto
+
+    
+      }
+    }
