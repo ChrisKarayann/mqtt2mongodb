@@ -15,14 +15,14 @@
 #include <SPI.h>
 #include <Adafruit_BMP280.h>
 
-const char apn[] = "vpn-internet"; // gsm carrier 
+const char apn[] = "YOUR_APN"; // gsm carrier 
 const char user[] = ""; // user empty
 const char pass[] = ""; // pass empty 
 
-const char* mqttServer = "liturgy-mqtt.darktech.org"; // my mqtt server domain
+const char* mqttServer = "YOUR_MQTT_SERVER"; // my mqtt server domain
 const int mqttPort = 9993; // my mqtt server tcp websockets listening port
-const char* mqttUser = "litmqtt"; // obvious
-const char* mqttPassword = "litmqtt1980"; // obviousb 
+const char* mqttUser = "YOUR_MQTT_USER"; // obvious
+const char* mqttPassword = "YOUR_MQTT_PASSWORD"; // obviousb 
 
 SoftwareSerial SerialAT(D4 , D3); //Rx , Tx - virtual for SoftSerial
 
